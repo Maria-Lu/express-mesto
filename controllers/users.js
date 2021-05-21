@@ -14,18 +14,15 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .then((user) => {
-      if (user) {
-        res.send({ data: user });
-      } else {
-        res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
-      }
-    })
+    .orFail(new Error('Not Found'))
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.message === 'Not Found') {
+        res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
+      } else if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
+        res.status(500).send({ message: 'На сервере произошла ошибка ' });
       }
     });
 };
@@ -52,15 +49,12 @@ module.exports.updateUserData = (req, res) => {
     runValidators: true,
     upsert: false,
   })
-    .then((user) => {
-      if (user) {
-        res.send({ data: user });
-      } else {
-        res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
-      }
-    })
+    .orFail(new Error('Not Found'))
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.message === 'Not Found') {
+        res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
+      } else if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
         res.status(500).send({ message: 'На сервере произошла ошибка' });
@@ -76,15 +70,12 @@ module.exports.updateUserAvatar = (req, res) => {
     runValidators: true,
     upsert: false,
   })
-    .then((user) => {
-      if (user) {
-        res.send({ data: user });
-      } else {
-        res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
-      }
-    })
+    .orFail(new Error('Not Found'))
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.message === 'Not Found') {
+        res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
+      } else if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
         res.status(500).send({ message: 'На сервере произошла ошибка' });
