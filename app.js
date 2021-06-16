@@ -14,6 +14,7 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { validateSignUp, validateSignIn } = require('./middlewares/validation');
 const errorHandler = require('./middlewares/errorHandler');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -29,8 +30,6 @@ const limiter = rateLimit({
   max: 100,
 });
 
-app.use(limiter);
-
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
   useCreateIndex: true,
@@ -38,12 +37,18 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
+app.use(requestLogger);
+
+app.use(limiter);
+
 app.post('/signin', validateSignIn, login);
 app.post('/signup', validateSignUp, createUser);
 
 app.use('/users', auth, usersRoute);
 app.use('/cards', auth, cardsRoute);
 app.use('*', notFoundRoute);
+
+app.use(errorLogger);
 
 app.use(errors());
 app.use(errorHandler);
